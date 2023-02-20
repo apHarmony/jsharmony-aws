@@ -22,6 +22,7 @@ var jsHarmonyModule = require('jsharmony/jsHarmonyModule');
 var jsHarmonyAWSConfig = require('./jsHarmonyAWSConfig.js');
 var AWS = require('aws-sdk');
 var ejs = require('jsharmony/lib/ejs');
+var async = require('async');
 
 function jsHarmonyAWS(name, options){
   options = _.extend({
@@ -80,25 +81,23 @@ jsHarmonyAWS.prototype.sendSMS = function(mparams, sms_options, callback){
   if(!_.isArray(mparams.to)) mparams.to = [mparams.to];
   var msg = (mparams.text||'').toString();
 
-  (async function(){
-    try{
-      var snsClient = new AWS.SNS({
-        accessKeyId: _this.Config.credentials.accessKeyId,
-        secretAccessKey: _this.Config.credentials.secretAccessKey,
-        region: _this.Config.region
-      });
-      snsClient.publish({
-        PhoneNumber: mparams.to,
-        Message: msg
-      }, function(err, data){
-        if(err) return callback(new Error('Error sending SMS: '+err.toString()));
-        return callback();
-      });
-    }
-    catch(ex){
-      return callback(new Error('Error sending SMS: '+ex.toString()));
-    }
-  })();
+  async.eachSeries(mparams.to, function(toPhone, phone_cb){
+    var snsClient = new AWS.SNS({
+      accessKeyId: _this.Config.credentials.accessKeyId,
+      secretAccessKey: _this.Config.credentials.secretAccessKey,
+      region: _this.Config.region
+    });
+    snsClient.publish({
+      PhoneNumber: toPhone,
+      Message: msg
+    }, function(err, data){
+      if(err) return phone_cb(new Error('Error sending SMS to '+toPhone+': '+err.toString()));
+      return phone_cb();
+    });
+  }, function(err){
+    if(err) return callback(new Error('Error sending SMS: '+err.toString()));
+    return callback();
+  });
 };
 
 module.exports = exports = jsHarmonyAWS;
