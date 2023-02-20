@@ -1,0 +1,17 @@
+{
+  "name": "jsharmony-aws",
+  "version": "1.0.0",
+  "description": "jsHarmony AWS",
+  "main": "index.js",
+  "keywords": [
+    "jsHarmony",
+    "AWS"
+  ],
+  "author": "apHarmony <contact@apharmony.com> (http://www.apharmony.com/)",
+  "license": "LGPL-3.0",
+  "dependencies": {
+    "jsharmony": "^1.27.0",
+    "lodash": "^4.17.19",
+    "@aws-sdk/client-sns": "^3.272.0"
+  }
+}
