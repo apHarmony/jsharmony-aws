@@ -12,6 +12,6 @@
   "dependencies": {
     "jsharmony": "^1.27.0",
     "lodash": "^4.17.19",
-    "@aws-sdk/client-sns": "^3.272.0"
+    "aws-sdk": "^2.0.0"
   }
 }

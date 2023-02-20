@@ -20,7 +20,7 @@ along with this package.  If not, see <http://www.gnu.org/licenses/>.
 var _ = require('lodash');
 var jsHarmonyModule = require('jsharmony/jsHarmonyModule');
 var jsHarmonyAWSConfig = require('./jsHarmonyAWSConfig.js');
-var { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
+var AWS = require('aws-sdk');
 var ejs = require('jsharmony/lib/ejs');
 
 function jsHarmonyAWS(name, options){
@@ -82,18 +82,18 @@ jsHarmonyAWS.prototype.sendSMS = function(mparams, sms_options, callback){
 
   (async function(){
     try{
-      var snsClient = new SNSClient({
-        credentials: {
-          accessKeyId: _this.Config.credentials.accessKeyId,
-          secretAccessKey: _this.Config.credentials.secretAccessKey,
-        },
+      var snsClient = new AWS.SNS({
+        accessKeyId: _this.Config.credentials.accessKeyId,
+        secretAccessKey: _this.Config.credentials.secretAccessKey,
         region: _this.Config.region
       });
-      await snsClient.send(new PublishCommand({
+      snsClient.publish({
         PhoneNumber: mparams.to,
         Message: msg
-      }));
-      return callback();
+      }, function(err, data){
+        if(err) return callback(new Error('Error sending SMS: '+err.toString()));
+        return callback();
+      });
     }
     catch(ex){
       return callback(new Error('Error sending SMS: '+ex.toString()));
